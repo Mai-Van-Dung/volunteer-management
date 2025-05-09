@@ -15,7 +15,7 @@ export default function Login() {
       e.preventDefault();
       setError("");
       setSuccess("");
-  
+    
       try {
         const response = await fetch("http://localhost:5000/api/auth/login", {
           method: "POST",
@@ -24,19 +24,36 @@ export default function Login() {
           },
           body: JSON.stringify({ email, password }),
         });
-  
+    
         const data = await response.json();
+        console.log("Dữ liệu trả về từ API:", data); // Log dữ liệu trả về
+    
         if (!response.ok) {
           throw new Error(data.message || "Something went wrong");
         }
-  
-        localStorage.setItem("token", data.token); // Store token in localStorage
+    
+        // Lưu token + thông tin user
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+    
         setSuccess("Login successful!");
-        navigate("/"); // Redirect to homepage
+    
+        // Điều hướng dựa vào role
+        if (data.user.role === "admin") {
+          navigate("/admin-dashboard");
+        } else if (data.user.role === "volunteer") {
+          navigate("/volunteer-dashboard");
+        } else if (data.user.role === "organizer") {
+          navigate("/organizer-dashboard");
+        } else {
+          navigate("/"); // fallback
+        }
       } catch (err) {
+        console.error("Lỗi khi đăng nhập:", err.message); // Log lỗi
         setError(err.message);
       }
     };
+    
 
   return (
     <div className="flex h-screen overflow-hidden">

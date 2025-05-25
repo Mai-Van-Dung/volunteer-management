@@ -64,6 +64,26 @@ router.get("/organizer/volunteers", async (req, res) => {
   }
 });
 
+// Route: Lấy lịch sử tham gia sự kiện của volunteer (CHỈ SỰ KIỆN ĐÃ KẾT THÚC)
+router.get("/:userId/registrations", async (req, res) => {
+  const { userId } = req.params;
+  try {
+    await sql.connect(dbConfig);
+    const result = await sql.query(`
+      SELECT 
+        e.Id AS id,
+        e.Name AS name,
+        e.Date AS date
+      FROM EventRegistrations r
+      JOIN Events e ON r.EventId = e.Id
+      WHERE r.VolunteerId = ${userId} AND e.IsFinished = 1
+    `);
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch registrations" });
+  }
+});
+
 // Route: Xóa người dùng
 router.delete("/:id", async (req, res) => {
   try {

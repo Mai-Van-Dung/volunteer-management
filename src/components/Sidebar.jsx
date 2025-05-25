@@ -14,11 +14,13 @@ const Sidebar = ({ role, onLogout }) => {
     volunteer: [
       { label: "Danh sách hoạt động", icon: <FiList />, path: "/volunteer/activities" },
       { label: "Trò chuyện với tổ chức", icon: <FiMessageCircle />, path: "/chat" },
+      { label: "Lịch sử tham gia", icon: <FiClock />, path: "/volunteer/history" },
       { label: "Đăng ký làm Organizer", icon: <FiCheckCircle />, path: "/volunteer/apply-organizer" },
     ],
     organizer: [
       { label: "Quản lý sự kiện", icon: <FiCalendar />, path: "/organizer/events" },
       { label: "Quản lý tình nguyện viên", icon: <FiUsers />, path: "/organizer/volunteers" },
+      { label: "Xác nhận giờ phục vụ", icon: <FiCheckCircle />, path: "/organizer/verify-hours" },
       { label: "Trò chuyện với tình nguyện viên", icon: <FiMessageCircle />, path: "/organizer/messages" },
     ],
   };

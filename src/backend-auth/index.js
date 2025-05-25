@@ -22,16 +22,18 @@ const frontendOrigin = API_BASE_URL.replace(/:5000$/, ":5173");
 const allowedOrigins = [
   "http://localhost:5173",
   frontendOrigin,
-  "http://192.168.1.13:5173",
+  "http://192.168.1.5:5173",
 ];
 
 // Socket.io: dùng hàm kiểm tra động cho origin để tránh lỗi CORS khi nhiều origin khác nhau
 const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
+      console.log("Socket.io connection attempt from origin:", origin);
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.error("Socket.io CORS blocked for origin:", origin);
         callback(new Error("Not allowed by CORS (socket.io)"));
       }
     },
@@ -53,7 +55,7 @@ app.use("/api/messages", messagesRouter);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventsRouter);
-app.use("/api/organizer-requests", organizerRequestsRouter); // Thêm dòng này để khai báo route
+app.use("/api/organizer-requests", organizerRequestsRouter); //khai báo route
 
 // Socket.io xử lý realtime
 io.on("connection", (socket) => {

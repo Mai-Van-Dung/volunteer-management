@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FiUsers, FiSettings, FiLogOut, FiBarChart2, FiBell, FiCheckCircle, FiClipboard } from "react-icons/fi";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
+import Sidebar from "../components/Sidebar";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -36,77 +37,8 @@ const AdminDashboard = () => {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-900 text-white flex flex-col justify-between">
-        <div>
-          <div className="p-6 text-2xl font-bold border-b border-gray-700">
-            Admin Panel
-          </div>
-          <nav className="p-4 space-y-4">
-            {/* Quản lý tài khoản */}
-            <div
-              className="flex items-center p-2 hover:bg-gray-800 rounded cursor-pointer"
-              onClick={() => navigate("/admin/user-management")}
-            >
-              <FiUsers className="mr-3" />
-              <span>Quản lý tài khoản</span>
-            </div>
-
-            {/* Quản lý hoạt động tình nguyện */}
-            <div
-              className="flex items-center p-2 hover:bg-gray-800 rounded cursor-pointer"
-              onClick={() => navigate("/admin/volunteer-activities")}
-            >
-              <FiClipboard className="mr-3" />
-              <span>Quản lý hoạt động</span>
-            </div>
-
-            {/* Xác nhận giờ đặc biệt */}
-            <div
-              className="flex items-center p-2 hover:bg-gray-800 rounded cursor-pointer"
-              onClick={() => navigate("/admin/confirm-special-hours")}
-            >
-              <FiCheckCircle className="mr-3" />
-              <span>Xác nhận giờ đặc biệt</span>
-            </div>
-
-            {/* Thống kê và báo cáo */}
-            <div
-              className="flex items-center p-2 hover:bg-gray-800 rounded cursor-pointer"
-              onClick={() => navigate("/admin/statistics")}
-            >
-              <FiBarChart2 className="mr-3" />
-              <span>Thống kê & Báo cáo</span>
-            </div>
-
-            {/* Gửi thông báo */}
-            <div
-              className="flex items-center p-2 hover:bg-gray-800 rounded cursor-pointer"
-              onClick={() => navigate("/admin/notifications")}
-            >
-              <FiBell className="mr-3" />
-              <span>Gửi thông báo</span>
-            </div>
-
-            {/* Cài đặt hệ thống */}
-            <div
-              className="flex items-center p-2 hover:bg-gray-800 rounded cursor-pointer"
-              onClick={() => navigate("/admin/settings")}
-            >
-              <FiSettings className="mr-3" />
-              <span>Cài đặt hệ thống</span>
-            </div>
-          </nav>
-        </div>
-        <div className="p-4 border-t border-gray-700">
-          <button
-            onClick={handleLogout}
-            className="flex items-center text-red-400 hover:text-red-600"
-          >
-            <FiLogOut className="mr-2" />
-            Đăng xuất
-          </button>
-        </div>
-      </aside>
+      <Sidebar role="admin" onLogout={handleLogout} />
+    
 
       {/* Main Content */}
       <main className="flex-1 p-10">

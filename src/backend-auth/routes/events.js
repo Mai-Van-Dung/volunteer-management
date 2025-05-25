@@ -140,15 +140,21 @@ router.post("/:eventId/register", async (req, res) => {
   try {
     const pool = await poolPromise;
     // Kiểm tra đã đăng ký chưa
-    const existing = await pool.request()
+    const existing = await pool
+      .request()
       .input("eventId", eventId)
       .input("volunteerId", volunteerId)
-      .query("SELECT * FROM EventRegistrations WHERE EventId = @eventId AND VolunteerId = @volunteerId");
+      .query(
+        "SELECT * FROM EventRegistrations WHERE EventId = @eventId AND VolunteerId = @volunteerId"
+      );
     if (existing.recordset.length > 0) {
-      return res.status(400).json({ message: "Bạn đã đăng ký sự kiện này rồi." });
+      return res
+        .status(400)
+        .json({ message: "Bạn đã đăng ký sự kiện này rồi." });
     }
     // Thêm đăng ký mới
-    await pool.request()
+    await pool
+      .request()
       .input("eventId", eventId)
       .input("volunteerId", volunteerId)
       .input("volunteerName", volunteerName)
@@ -159,7 +165,9 @@ router.post("/:eventId/register", async (req, res) => {
       );
     res.json({ message: "Đăng ký sự kiện thành công!" });
   } catch (err) {
-    res.status(500).json({ message: "Lỗi khi đăng ký sự kiện", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Lỗi khi đăng ký sự kiện", error: err.message });
   }
 });
 
@@ -184,5 +192,29 @@ router.get("/:id/registrations", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch registrations" });
   }
 });
-
+// Kết thúc sự kiện (Organizer bấm nút)
+router.put("/:eventId/finish", async (req, res) => {
+  const { eventId } = req.params;
+  try {
+    const pool = await poolPromise;
+    // Log eventId để kiểm tra
+    console.log("Finish eventId:", eventId);
+    const result = await pool
+      .request()
+      .input("eventId", sql.Int, eventId)
+      .query("UPDATE Events SET IsFinished = 1 WHERE Id = @eventId");
+    // Kiểm tra có update được không
+    if (result.rowsAffected[0] === 0) {
+      return res
+        .status(404)
+        .json({ error: "Event not found or already finished" });
+    }
+    res.json({ message: "Sự kiện đã được kết thúc" });
+  } catch (err) {
+    console.error("Error finishing event:", err);
+    res
+      .status(500)
+      .json({ error: "Failed to finish event", detail: err.message });
+  }
+});
 export default router;

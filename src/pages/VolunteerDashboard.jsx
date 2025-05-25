@@ -35,6 +35,7 @@ const VolunteerDashboard = () => {
           category: e.Category,
           created_at: e.Created_At,
           updated_at: e.Updated_At,
+          isFinished: e.IsFinished, // Thêm trường này để kiểm tra sự kiện đã kết thúc
         }));
         setEvents(mappedEvents);
       } catch (err) {
@@ -54,6 +55,14 @@ const VolunteerDashboard = () => {
     const volunteer = JSON.parse(localStorage.getItem("user"));
     if (!volunteer || !volunteer.email) {
       setNoticeMessage("Thông tin tình nguyện viên không hợp lệ. Vui lòng đăng nhập lại.");
+      setShowNotice(true);
+      return;
+    }
+
+    // Kiểm tra sự kiện đã kết thúc chưa
+    const event = events.find(e => e.id === eventId);
+    if (event && event.isFinished) {
+      setNoticeMessage("Sự kiện này đã kết thúc. Bạn không thể đăng ký.");
       setShowNotice(true);
       return;
     }
@@ -122,16 +131,14 @@ const VolunteerDashboard = () => {
                   </p>
                   <button
                     onClick={() => handleRegister(event.id)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    className={`px-4 py-2 rounded text-white ${event.isFinished ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+                    disabled={event.isFinished}
                   >
-                    Đăng ký
+                    {event.isFinished ? "Đã kết thúc" : "Đăng ký"}
                   </button>
                   <button
-                    onClick={() => {
-                      console.log("event.id:", event.id);
-                      navigate(`/volunteer/events/${event.id}`);
-                    }}
-                    className="text-blue-600 hover:underline flex items-center"
+                    onClick={() => navigate(`/volunteer/events/${event.id}`)}
+                    className="text-blue-600 hover:underline flex items-center ml-2"
                   >
                     Xem
                   </button>

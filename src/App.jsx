@@ -16,7 +16,8 @@ import EventRegistrations from "./pages/EventRegistrations";
 import AllVolunteers from "./pages/AllVolunteers";
 import Chat from "./pages/Chat";
 import ChatList from "./pages/ChatList";
-
+import AdminOrganizerRequests from "./pages/AdminOrganizerRequests";
+import ApplyOrganizer from "./pages/ApplyOrganizer";
 function App() {
   // Lấy user từ localStorage (nếu đã đăng nhập)
   const [user, setUser] = useState(() => {
@@ -52,6 +53,9 @@ function App() {
               <Route path="/chat" element={<ChatList user={user} />} />
               <Route path="/organizer/messages/:volunteerId" element={<Chat user={user} />} />
               <Route path="/chat/:organizerId" element={<Chat user={user} />} />
+              <Route path="/volunteer/apply-organizer" element={<ApplyOrganizer />} />
+              <Route path="/admin/organizer-requests" element={<AdminOrganizerRequests />} />
+
             </>
           )}
         </Routes>

@@ -13,12 +13,14 @@ const Sidebar = ({ role, onLogout }) => {
       { label: "Xác nhận giờ đặc biệt", icon: <FiCheckCircle />, path: "/admin/confirm-special-hours" },
       { label: "Thống kê & Báo cáo", icon: <FiBarChart2 />, path: "/admin/statistics" },
       { label: "Gửi thông báo", icon: <FiBell />, path: "/admin/notifications" },
+      { label: "Duyệt organizer", icon: <FiCheckCircle />, path: "/admin/organizer-requests" },
       { label: "Cài đặt hệ thống", icon: <FiSettings />, path: "/admin/settings" },
     ],
     volunteer: [
       { label: "Danh sách hoạt động", icon: <FiList />, path: "/volunteer/activities" },
       { label: "Lịch sử tham gia", icon: <FiClock />, path: "/volunteer/history" },
       { label: "Trò chuyện với tổ chức", icon: <FiMessageCircle />, path: "/chat" },
+      { label: "Đăng ký làm Organizer", icon: <FiCheckCircle />, path: "/volunteer/apply-organizer" },
     ],
     organizer: [
       { label: "Quản lý sự kiện", icon: <FiCalendar />, path: "/organizer/events" },

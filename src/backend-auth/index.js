@@ -8,6 +8,7 @@ import userRoutes from "./routes/users.js";
 import eventsRouter from "./routes/events.js";
 import messagesRouter from "./routes/messages.js";
 import { API_BASE_URL } from "../config.js";
+import organizerRequestsRouter from "./routes/organizerRequests.js"; // Đã thêm dòng này
 
 dotenv.config();
 
@@ -50,6 +51,7 @@ app.use("/api/messages", messagesRouter);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventsRouter);
+app.use("/api/organizer-requests", organizerRequestsRouter); // Thêm dòng này để khai báo route
 
 // Socket.io xử lý realtime
 io.on("connection", (socket) => {

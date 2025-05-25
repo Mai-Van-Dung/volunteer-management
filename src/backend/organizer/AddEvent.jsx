@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../../config";
 
 const AddEvent = () => {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ const AddEvent = () => {
     e.preventDefault();
     console.log("Form data:", formData); // Log dữ liệu trước khi gửi
     try {
-      await axios.post("http://localhost:5000/api/events", formData);
+      await axios.post(`${API_BASE_URL}/api/events`, formData);
       alert("Sự kiện đã được tạo thành công!");
       navigate("/organizer-dashboard"); // Chuyển hướng đến dashboard
     } catch (err) {

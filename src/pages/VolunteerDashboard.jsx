@@ -2,12 +2,17 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import formatDateTime from "../utils/formatDateTime";
+import { API_BASE_URL } from "../config";
 
 const VolunteerDashboard = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
-  const [events, setEvents] = useState([]); // Đổi tên state từ activities thành events
+  const [events, setEvents] = useState([]);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [showNotice, setShowNotice] = useState(false);
+  const [noticeMessage, setNoticeMessage] = useState("");
 
   useEffect(() => {
     if (!user || user.role !== "volunteer") {
@@ -17,13 +22,26 @@ const VolunteerDashboard = () => {
 
     const fetchEvents = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/events"); // Gọi API lấy danh sách sự kiện
-        setEvents(res.data); 
+        const res = await axios.get(`${API_BASE_URL}/api/events`);
+        const mappedEvents = res.data.map(e => ({
+          id: e.Id,
+          name: e.Name,
+          date: e.Date,
+          location: e.Location,
+          description: e.Description,
+          capacity: e.Capacity,
+          status: e.Status,
+          image_url: e.Image_Url,
+          category: e.Category,
+          created_at: e.Created_At,
+          updated_at: e.Updated_At,
+        }));
+        setEvents(mappedEvents);
       } catch (err) {
         console.error("Lỗi khi lấy danh sách sự kiện:", err);
       }
     };
-    
+
     fetchEvents();
   }, [user, navigate]);
 
@@ -31,33 +49,36 @@ const VolunteerDashboard = () => {
     localStorage.clear();
     navigate("/login");
   };
+
   const handleRegister = async (eventId) => {
-    const volunteer = JSON.parse(localStorage.getItem("user")); 
-  
+    const volunteer = JSON.parse(localStorage.getItem("user"));
     if (!volunteer || !volunteer.email) {
-      alert("Thông tin tình nguyện viên không hợp lệ. Vui lòng đăng nhập lại.");
+      setNoticeMessage("Thông tin tình nguyện viên không hợp lệ. Vui lòng đăng nhập lại.");
+      setShowNotice(true);
       return;
     }
-  
-    console.log("Volunteer Info:", volunteer); // Log thông tin volunteer để kiểm tra
-  
+
     try {
-      await axios.post(`http://localhost:5000/api/events/${eventId}/register`, {
+      await axios.post(`${API_BASE_URL}/api/events/${eventId}/register`, {
         volunteerId: volunteer.id,
         volunteerName: volunteer.name,
         volunteerEmail: volunteer.email,
       });
-      alert("Đăng ký sự kiện thành công!");
+      setNoticeMessage("Đăng ký sự kiện thành công!");
+      setShowNotice(true);
     } catch (err) {
-      console.error("Lỗi khi đăng ký sự kiện:", err);
-      alert("Không thể đăng ký sự kiện. Vui lòng thử lại.");
+      setNoticeMessage(
+        err.response?.data?.message ||
+        "Không thể đăng ký sự kiện. Vui lòng thử lại."
+      );
+      setShowNotice(true);
     }
   };
 
-  const filteredEvents = events.filter((event) =>
-    event.name.toLowerCase().includes(search.toLowerCase()) ||
-    event.location.toLowerCase().includes(search.toLowerCase()) ||
-    event.description?.toLowerCase().includes(search.toLowerCase())
+  const filteredEvents = events.filter(
+    (event) =>
+      (!selectedCategory || (event.category && event.category.toLowerCase() === selectedCategory.toLowerCase())) &&
+      (!search || event.name.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -94,29 +115,46 @@ const VolunteerDashboard = () => {
                     <strong>Địa điểm:</strong> {event.location}
                   </p>
                   <p className="text-sm text-gray-600 mb-1">
-                    <strong>Thời gian:</strong> {event.date}
+                    <strong>Thời gian:</strong> {formatDateTime(event.date)}
                   </p>
                   <p className="text-sm text-gray-600 mb-4">
                     <strong>Mô tả:</strong> {event.description || "Không có mô tả"}
                   </p>
                   <button
-                  onClick={() => handleRegister(event.id)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Đăng ký
-                </button>
+                    onClick={() => handleRegister(event.id)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Đăng ký
+                  </button>
                   <button
-                  onClick={() => navigate(`/volunteer/events/${event.id}`)}
-                  className="text-blue-600 hover:underline flex items-center"
-                >
-                  Xem
-                </button>
+                    onClick={() => {
+                      console.log("event.id:", event.id);
+                      navigate(`/volunteer/events/${event.id}`);
+                    }}
+                    className="text-blue-600 hover:underline flex items-center"
+                  >
+                    Xem
+                  </button>
                 </div>
               ))
             ) : (
               <p className="text-gray-600 col-span-full text-center">
                 Không tìm thấy sự kiện nào phù hợp.
               </p>
+            )}
+            {showNotice && (
+              <div className="flex items-center justify-center z-50 absolute top-10 left-1/2 transform -translate-x-1/2">
+                <div className="bg-white rounded-lg p-6 w-full max-w-xs shadow-lg text-center border border-blue-200">
+                  <h2 className="text-lg font-bold mb-2">Thông báo</h2>
+                  <p>{noticeMessage}</p>
+                  <button
+                    onClick={() => setShowNotice(false)}
+                    className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>

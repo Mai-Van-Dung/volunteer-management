@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 const EditEvent = () => {
   const { id } = useParams(); // Lấy ID sự kiện từ URL
@@ -19,7 +20,7 @@ const EditEvent = () => {
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/events/${id}`);
+        const res = await axios.get(`${API_BASE_URL}/api/events/${id}`);
         setFormData(res.data); // Đổ dữ liệu sự kiện vào form
       } catch (err) {
         console.error("Lỗi khi lấy chi tiết sự kiện:", err);
@@ -39,7 +40,7 @@ const EditEvent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/events/${id}`, formData);
+      await axios.put(`${API_BASE_URL}/api/events/${id}`, formData);
       alert("Cập nhật sự kiện thành công!");
       navigate("/organizer-dashboard");
     } catch (err) {

@@ -1,43 +1,49 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import bgImage from "../assets/image75.png";
-import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
-export default function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-    const navigate = useNavigate(); 
-  
-    const handleLogin = async (e) => {
-      e.preventDefault();
-      setError("");
-      setSuccess("");
-    
-      try {
-        const response = await fetch("http://localhost:5000/api/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        });
-    
-        const data = await response.json();
-        console.log("Dữ liệu trả về từ API:", data); // Log dữ liệu trả về
-    
-        if (!response.ok) {
-          throw new Error(data.message || "Something went wrong");
-        }
-    
-        // Lưu token + thông tin user
+import { API_BASE_URL } from "../config";
+
+export default function Login({ setUser }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      // Log dữ liệu trả về và trạng thái response
+      console.log("Dữ liệu trả về từ API:", data);
+      alert("API response: " + JSON.stringify(data)); // Hiện popup trên iPhone
+
+      // Kiểm tra data.user và data.user.role tồn tại trước khi truy cập
+      if (response.ok && data.user && data.user.role) {
+        const userObj = {
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          role: data.user.role
+        };
+        localStorage.setItem("user", JSON.stringify(userObj));
         localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-    
-        setSuccess("Login successful!");
-    
+        setUser && setUser(userObj); // Cập nhật state user ở App.jsx
+        setSuccess("Đăng nhập thành công!");
+
         // Điều hướng dựa vào role
         if (data.user.role === "admin") {
           navigate("/admin-dashboard");
@@ -46,14 +52,17 @@ export default function Login() {
         } else if (data.user.role === "organizer") {
           navigate("/organizer-dashboard");
         } else {
-          navigate("/"); // fallback
+          navigate("/");
         }
-      } catch (err) {
-        console.error("Lỗi khi đăng nhập:", err.message); // Log lỗi
-        setError(err.message);
+      } else {
+        setError(data.message || "Đăng nhập thất bại");
       }
-    };
-    
+    } catch (err) {
+      console.error("Lỗi khi đăng nhập:", err.message);
+      alert("Lỗi: " + err.message); // Hiện popup lỗi trên iPhone
+      setError("Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.");
+    }
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -76,6 +85,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your email"
+              required
             />
           </div>
           <div className="mb-4">
@@ -89,6 +99,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your password"
+              required
             />
           </div>
           <button
@@ -98,18 +109,18 @@ export default function Login() {
             Login
           </button>
           <div className="my-4 w-full max-w-sm flex items-center justify-center">
-          <div className="border-t border-gray-300 flex-grow mr-3" />
-          <span className="text-sm text-gray-500">or</span>
-          <div className="border-t border-gray-300 flex-grow ml-3" />
-        </div>
+            <div className="border-t border-gray-300 flex-grow mr-3" />
+            <span className="text-sm text-gray-500">or</span>
+            <div className="border-t border-gray-300 flex-grow ml-3" />
+          </div>
           <div className="flex space-x-4 w-full max-w-sm">
-                    <button className="flex items-center justify-center w-1/2 border border-gray-300 rounded-md py-2 text-sm hover:bg-gray-100">
-                      <FcGoogle className="mr-2 text-xl" /> Sign in with Google
-                    </button>
-                    <button className="flex items-center justify-center w-1/2 border border-gray-300 rounded-md py-2 text-sm hover:bg-gray-100">
-                      <FaApple className="mr-2 text-xl" /> Sign in with Apple
-                    </button>
-                  </div>
+            <button type="button" className="flex items-center justify-center w-1/2 border border-gray-300 rounded-md py-2 text-sm hover:bg-gray-100">
+              <FcGoogle className="mr-2 text-xl" /> Sign in with Google
+            </button>
+            <button type="button" className="flex items-center justify-center w-1/2 border border-gray-300 rounded-md py-2 text-sm hover:bg-gray-100">
+              <FaApple className="mr-2 text-xl" /> Sign in with Apple
+            </button>
+          </div>
         </form>
         <p className="text-sm mt-6">
           Don't have an account? <Link to="/signup" className="text-blue-600 hover:underline">Sign Up</Link>

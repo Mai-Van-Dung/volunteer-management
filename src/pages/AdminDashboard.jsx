@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiUsers, FiSettings, FiLogOut, FiBarChart2, FiBell, FiCheckCircle, FiClipboard } from "react-icons/fi";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ const AdminDashboard = () => {
     // Fetch total users
     const fetchTotalUsers = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/users");
+        const res = await axios.get(`${API_BASE_URL}/api/users`);
         setTotalUsers(res.data.length);
       } catch (err) {
         console.error("Lỗi khi lấy tổng số người dùng:", err);

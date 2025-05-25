@@ -3,7 +3,6 @@ import sql from "mssql";
 import express from "express";
 
 const router = express.Router();
-
 // Route: Lấy danh sách tất cả sự kiện
 router.get("/", async (req, res) => {
   try {
@@ -134,36 +133,33 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// Route: Đăng ký sự kiện
-router.post("/:id/register", async (req, res) => {
-  const { id } = req.params; // ID của sự kiện
-  const { volunteerId, volunteerName, volunteerEmail } = req.body; // Thông tin volunteer
-
-  console.log("Received Data:", { volunteerId, volunteerName, volunteerEmail }); // Log dữ liệu nhận được
-
-  if (!volunteerId || !volunteerName || !volunteerEmail) {
-    return res
-      .status(400)
-      .json({ error: "Thông tin tình nguyện viên không đầy đủ." });
-  }
-
+// Đăng ký sự kiện
+router.post("/:eventId/register", async (req, res) => {
+  const { eventId } = req.params;
+  const { volunteerId, volunteerName, volunteerEmail } = req.body;
   try {
     const pool = await poolPromise;
-    await pool
-      .request()
-      .input("eventId", sql.Int, id)
-      .input("volunteerId", sql.Int, volunteerId)
-      .input("volunteerName", sql.NVarChar, volunteerName)
-      .input("volunteerEmail", sql.NVarChar, volunteerEmail)
+    // Kiểm tra đã đăng ký chưa
+    const existing = await pool.request()
+      .input("eventId", eventId)
+      .input("volunteerId", volunteerId)
+      .query("SELECT * FROM EventRegistrations WHERE EventId = @eventId AND VolunteerId = @volunteerId");
+    if (existing.recordset.length > 0) {
+      return res.status(400).json({ message: "Bạn đã đăng ký sự kiện này rồi." });
+    }
+    // Thêm đăng ký mới
+    await pool.request()
+      .input("eventId", eventId)
+      .input("volunteerId", volunteerId)
+      .input("volunteerName", volunteerName)
+      .input("volunteerEmail", volunteerEmail)
       .query(
-        `INSERT INTO EventRegistrations (event_id, volunteer_id, volunteer_name, volunteer_email)
+        `INSERT INTO EventRegistrations (EventId, VolunteerId, VolunteerName, VolunteerEmail)
          VALUES (@eventId, @volunteerId, @volunteerName, @volunteerEmail)`
       );
-
-    res.status(201).json({ message: "Đăng ký sự kiện thành công!" });
+    res.json({ message: "Đăng ký sự kiện thành công!" });
   } catch (err) {
-    console.error("Error registering for event:", err);
-    res.status(500).json({ error: "Failed to register for event" });
+    res.status(500).json({ message: "Lỗi khi đăng ký sự kiện", error: err.message });
   }
 });
 
@@ -177,9 +173,9 @@ router.get("/:id/registrations", async (req, res) => {
       .request()
       .input("eventId", sql.Int, id)
       .query(
-        `SELECT volunteer_id, volunteer_name, volunteer_email, registered_at
+        `SELECT VolunteerId, VolunteerName, VolunteerEmail, RegisteredAt
          FROM EventRegistrations
-         WHERE event_id = @eventId`
+         WHERE EventId = @eventId`
       );
 
     res.json(result.recordset); // Trả về danh sách tình nguyện viên đã đăng ký

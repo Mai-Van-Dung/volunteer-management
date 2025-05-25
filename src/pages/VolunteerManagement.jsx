@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 const VolunteerManagement = () => {
   const { id } = useParams(); // Lấy ID sự kiện từ URL
@@ -10,7 +11,7 @@ const VolunteerManagement = () => {
   useEffect(() => {
     const fetchRegistrations = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/events/${id}/registrations`);
+        const res = await axios.get(`${API_BASE_URL}/api/events/${id}/registrations`);
         setRegistrations(res.data); // Lưu danh sách tình nguyện viên vào state
         setLoading(false);
       } catch (err) {

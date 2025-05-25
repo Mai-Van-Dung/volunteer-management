@@ -1,41 +1,41 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import bgImage from "../assets/image75.png";
-import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const Signup = () => {
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const navigate = useNavigate(); // Add navigate for redirection
-  
-    const handleSignup = async (e) => {
-      e.preventDefault();
-      setError("");
-  
-      try {
-        const response = await fetch("http://localhost:5000/api/auth/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name, email, password }),
-        });
-  
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error(data.message || "Registration failed");
-        }
-  
-        alert("Signup successful! Redirecting to login...");
-        navigate("/login"); // Redirect to login page
-      } catch (err) {
-        setError(err.message);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed");
       }
-    };
+
+      alert("Signup successful! Redirecting to login...");
+      navigate("/login");
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   return (
     <div className="flex h-screen">

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import formatDateTime from "../utils/formatDateTime";
+import { API_BASE_URL } from "../config";
 
 const EventDetails = () => {
   const { id } = useParams(); // Lấy ID sự kiện từ URL
@@ -14,8 +16,22 @@ const EventDetails = () => {
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/events/${id}`);
-        setEvent(res.data); // Lưu thông tin sự kiện vào state
+        const res = await axios.get(`${API_BASE_URL}/api/events/${id}`);
+        // Map lại dữ liệu từ PascalCase sang camelCase
+        const e = res.data;
+        setEvent({
+          id: e.Id,
+          name: e.Name,
+          date: e.Date,
+          location: e.Location,
+          description: e.Description,
+          capacity: e.Capacity,
+          status: e.Status,
+          image_url: e.Image_Url,
+          category: e.Category,
+          created_at: e.Created_At,
+          updated_at: e.Updated_At,
+        });
         setLoading(false);
       } catch (err) {
         console.error("Lỗi khi lấy chi tiết sự kiện:", err);
@@ -39,7 +55,7 @@ const EventDetails = () => {
     <div className="flex h-screen bg-gray-100">
       <div className="m-auto bg-white shadow-md rounded-lg p-6 w-full max-w-md">
         <h1 className="text-2xl font-bold mb-4 text-gray-800">{event.name}</h1>
-        <p><strong>Ngày:</strong> {event.date}</p>
+        <p><strong>Ngày:</strong> {formatDateTime(event.date)}</p>
         <p><strong>Địa điểm:</strong> {event.location}</p>
         <p><strong>Mô tả:</strong> {event.description}</p>
         <p><strong>Số lượng:</strong> {event.capacity}</p>

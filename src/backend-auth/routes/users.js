@@ -18,16 +18,49 @@ const dbConfig = {
 // Route: Lấy danh sách người dùng
 router.get("/", async (req, res) => {
   try {
-    console.log("Đang kết nối đến cơ sở dữ liệu...");
-    await sql.connect(dbConfig); // Kết nối sau khi dbConfig được khai báo
-    console.log("Kết nối thành công!");
+    await sql.connect(dbConfig);
     const result = await sql.query(
       "SELECT id, Name AS username, Email AS email, role, PasswordHash FROM Users WHERE role != 'admin'"
     );
     res.json(result.recordset);
   } catch (err) {
-    console.error("Error fetching users:", err);
     res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+// Route: Lấy danh sách tổ chức cho volunteer (ĐẶT TRƯỚC ROUTE ĐỘNG)
+router.get("/organizers", async (req, res) => {
+  try {
+    await sql.connect(dbConfig);
+    const result = await sql.query(`
+      SELECT 
+        Id AS OrganizerId,
+        Name AS OrganizerName,
+        Email AS OrganizerEmail
+      FROM Users
+      WHERE Role = 'organizer'
+    `);
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch organizers" });
+  }
+});
+
+// Route: Lấy danh sách volunteer cho organizer
+router.get("/organizer/volunteers", async (req, res) => {
+  try {
+    await sql.connect(dbConfig);
+    const result = await sql.query(`
+      SELECT 
+        Id AS VolunteerId,
+        Name AS VolunteerName,
+        Email AS VolunteerEmail
+      FROM Users
+      WHERE Role = 'volunteer'
+    `);
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch volunteers" });
   }
 });
 
@@ -35,11 +68,10 @@ router.get("/", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    await sql.connect(dbConfig); // Kết nối trước khi thực hiện truy vấn
+    await sql.connect(dbConfig);
     await sql.query(`DELETE FROM Users WHERE id = ${id}`);
     res.json({ message: "User deleted successfully" });
   } catch (err) {
-    console.error("Error deleting user:", err);
     res.status(500).json({ error: "Failed to delete user" });
   }
 });
@@ -49,23 +81,14 @@ router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { username, email, role, password } = req.body;
-
-    // Mã hóa mật khẩu nếu có
     const passwordHash = password ? await bcrypt.hash(password, 10) : null;
-
-    await sql.connect(dbConfig); // Kết nối trước khi thực hiện truy vấn
-
-    // Thực hiện truy vấn cập nhật người dùng
+    await sql.connect(dbConfig);
     const query = passwordHash
       ? `UPDATE Users SET Name = '${username}', Email = '${email}', role = '${role}', PasswordHash = '${passwordHash}' WHERE id = ${id}`
       : `UPDATE Users SET Name = '${username}', Email = '${email}', role = '${role}' WHERE id = ${id}`;
-
-    console.log("Truy vấn SQL:", query); // Log truy vấn SQL
     await sql.query(query);
-
     res.json({ message: "User updated successfully" });
   } catch (err) {
-    console.error("Error updating user:", err);
     res.status(500).json({ error: "Failed to update user" });
   }
 });
@@ -74,21 +97,13 @@ router.put("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const { username, email, role, password } = req.body;
-
-    // Mã hóa mật khẩu
     const passwordHash = await bcrypt.hash(password, 10);
-
-    // Kết nối đến cơ sở dữ liệu
     await sql.connect(dbConfig);
-
-    // Thực hiện truy vấn thêm người dùng
     const result = await sql.query(
       `INSERT INTO Users (Name, Email, role, PasswordHash) OUTPUT INSERTED.* VALUES ('${username}', '${email}', '${role}', '${passwordHash}')`
     );
-
-    res.json(result.recordset[0]); // Trả về người dùng vừa được thêm
+    res.json(result.recordset[0]);
   } catch (err) {
-    console.error("Error adding user:", err);
     res.status(500).json({ error: "Failed to add user" });
   }
 });

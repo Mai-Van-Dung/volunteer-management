@@ -18,13 +18,13 @@ const Sidebar = ({ role, onLogout }) => {
     volunteer: [
       { label: "Danh sách hoạt động", icon: <FiList />, path: "/volunteer/activities" },
       { label: "Lịch sử tham gia", icon: <FiClock />, path: "/volunteer/history" },
-      { label: "Chat với tổ chức", icon: <FiMessageCircle />, path: "/chat" },
+      { label: "Trò chuyện với tổ chức", icon: <FiMessageCircle />, path: "/chat" },
     ],
     organizer: [
       { label: "Quản lý sự kiện", icon: <FiCalendar />, path: "/organizer/events" },
-      { label: "Quản lý tình nguyện viên", icon: <FiUsers />, path: "/organizer/volunteers/1" },
+      { label: "Quản lý tình nguyện viên", icon: <FiUsers />, path: "/organizer/volunteers" },
       { label: "Xác nhận giờ phục vụ", icon: <FiCheckCircle />, path: "/organizer/verify-hours" },
-      { label: "Tương tác với tình nguyện viên", icon: <FiMessageCircle />, path: "/organizer/messages" },
+      { label: "Trò chuyện với tình nguyện viên", icon: <FiMessageCircle />, path: "/organizer/messages" },
     ],
   };
 
@@ -32,7 +32,11 @@ const Sidebar = ({ role, onLogout }) => {
     <aside className="w-64 bg-gray-900 text-white flex flex-col justify-between">
       <div>
         <div className="p-6 text-2xl font-bold border-b border-gray-700">
-          {role === "admin" ? "Admin Panel" : role === "volunteer" ? "Volunteer Panel" : "Organizer Panel"}
+          {role === "admin"
+            ? "Admin Panel"
+            : role === "volunteer"
+              ? "Volunteer Panel"
+              : "Organizer Panel"}
         </div>
         <nav className="p-4 space-y-4">
           {menuItems[role]?.map((item, index) => (

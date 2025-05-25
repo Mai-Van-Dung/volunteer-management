@@ -3,10 +3,27 @@ import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiPlus, FiTrash2, FiEye, FiEdit } from "react-icons/fi";
+import formatDateTime from "../utils/formatDateTime";
+import { API_BASE_URL } from "../config";
+
 const OrganizerDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const [events, setEvents] = useState([]);
+  const [registrations, setRegistrations] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedEventName, setSelectedEventName] = useState("");
+
+  const handleViewRegistrations = async (eventId, eventName) => {
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/events/${eventId}/registrations`);
+      setRegistrations(res.data);
+      setSelectedEventName(eventName);
+      setShowModal(true);
+    } catch (err) {
+      alert("Không thể lấy danh sách đăng ký.");
+    }
+  };
 
   // Fetch events from the backend
   useEffect(() => {
@@ -14,17 +31,30 @@ const OrganizerDashboard = () => {
       alert("Bạn không có quyền truy cập vào trang này!");
       navigate("/login");
     }
-  
+
     const fetchEvents = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/events");
-        console.log("Fetched events:", res.data); // Log dữ liệu từ API
-        setEvents(res.data);
+        const res = await axios.get(`${API_BASE_URL}/api/events`);
+        // Map lại dữ liệu từ PascalCase sang camelCase
+        const mappedEvents = res.data.map(event => ({
+          id: event.Id,
+          name: event.Name,
+          date: event.Date,
+          location: event.Location,
+          description: event.Description,
+          capacity: event.Capacity,
+          status: event.Status,
+          image_url: event.Image_Url,
+          category: event.Category,
+          created_at: event.Created_At,
+          updated_at: event.Updated_At,
+        }));
+        setEvents(mappedEvents);
       } catch (err) {
         console.error("Lỗi khi lấy danh sách sự kiện:", err);
       }
     };
-  
+
     fetchEvents();
   }, [user, navigate]);
 
@@ -38,7 +68,7 @@ const OrganizerDashboard = () => {
   const handleDeleteEvent = async (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa sự kiện này?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/events/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/events/${id}`);
         setEvents(events.filter((event) => event.id !== id));
         alert("Xóa sự kiện thành công!");
       } catch (err) {
@@ -52,7 +82,32 @@ const OrganizerDashboard = () => {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <Sidebar role="organizer" onLogout={handleLogout} />
-
+      {showModal && (
+        <div className="flex items-center justify-center z-50 absolute top-10 left-1/2 transform -translate-x-1/2">
+          <div className="bg-white rounded-lg p-6 w-full max-w-xs shadow-lg text-center border border-blue-200">
+            <h2 className="text-lg font-bold mb-2">
+              Danh sách tình nguyện viên đã đăng ký: {selectedEventName}
+            </h2>
+            {registrations.length > 0 ? (
+              <ul className="divide-y">
+                {registrations.map((reg) => (
+                  <li key={reg.Id} className="py-2">
+                    <strong>{reg.VolunteerName}</strong> ({reg.VolunteerEmail})
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Chưa có ai đăng ký sự kiện này.</p>
+            )}
+            <button
+              onClick={() => setShowModal(false)}
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      )}
       {/* Main Content */}
       <main className="flex-1 p-10">
         <div className="bg-white shadow-md rounded-lg p-6">
@@ -95,25 +150,23 @@ const OrganizerDashboard = () => {
                   events.map((event, index) => (
                     <tr
                       key={event.id}
-                      className={`border-t ${
-                        index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                      } hover:bg-gray-100`}
+                      className={`border-t ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                        } hover:bg-gray-100`}
                     >
                       <td className="py-3 px-4">{index + 1}</td>
                       <td className="py-3 px-4">{event.name}</td>
-                      <td className="py-3 px-4">{event.date}</td>
+                      <td className="py-3 px-4">{formatDateTime(event.date)}</td>
                       <td className="py-3 px-4">{event.location}</td>
                       <td className="py-3 px-4">{event.description}</td>
                       <td className="py-3 px-4">{event.capacity}</td>
                       <td className="py-3 px-4">
                         <span
-                          className={`px-2 py-1 rounded ${
-                            event.status === "approved"
-                              ? "bg-green-100 text-green-700"
-                              : event.status === "pending"
+                          className={`px-2 py-1 rounded ${event.status === "approved"
+                            ? "bg-green-100 text-green-700"
+                            : event.status === "pending"
                               ? "bg-yellow-100 text-yellow-700"
                               : "bg-red-100 text-red-700"
-                          }`}
+                            }`}
                         >
                           {event.status}
                         </span>
@@ -131,20 +184,26 @@ const OrganizerDashboard = () => {
                       </td>
                       <td className="py-3 px-4">{event.category}</td>
                       <td className="py-3 px-4 flex space-x-2">
-                      <button
-                      onClick={() => navigate(`/organizer/events/${event.id}`)}
-                      className="text-blue-600 hover:underline flex items-center"
-                    >
-                      <FiEye className="mr-1" />
-                      Xem
-                    </button>
-                    <button
-  onClick={() => navigate(`/organizer/events/edit/${event.id}`)}
-  className="text-green-600 hover:underline flex items-center"
->
-  <FiEdit className="mr-1" />
-  Chỉnh sửa
-</button>
+                        <button
+                          onClick={() => navigate(`/organizer/events/${event.id}/registrations`)}
+                          className="text-purple-600 hover:underline flex items-center"
+                        >
+                          Xem đăng ký
+                        </button>
+                        <button
+                          onClick={() => navigate(`/organizer/events/${event.id}`)}
+                          className="text-blue-600 hover:underline flex items-center"
+                        >
+                          <FiEye className="mr-1" />
+                          Xem
+                        </button>
+                        <button
+                          onClick={() => navigate(`/organizer/events/edit/${event.id}`)}
+                          className="text-green-600 hover:underline flex items-center"
+                        >
+                          <FiEdit className="mr-1" />
+                          Chỉnh sửa
+                        </button>
                         <button
                           onClick={() => handleDeleteEvent(event.id)}
                           className="text-red-600 hover:underline flex items-center"

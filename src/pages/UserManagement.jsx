@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Sidebar from "../components/Sidebar"; // Sử dụng Sidebar component
+import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -9,7 +10,7 @@ const UserManagement = () => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    role: "volunteer", // Giá trị mặc định là "volunteer"
+    role: "volunteer",
     password: "",
   });
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ const UserManagement = () => {
   // Fetch users from API
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/users");
+      const res = await axios.get(`${API_BASE_URL}/api/users`);
       setUsers(res.data);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách user:", err);
@@ -32,7 +33,7 @@ const UserManagement = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/users/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/users/${id}`);
         setUsers(users.filter((user) => user.id !== id));
         alert("Xóa người dùng thành công!");
       } catch (err) {
@@ -49,7 +50,7 @@ const UserManagement = () => {
       username: user.username,
       email: user.email,
       role: user.role,
-      password: "", // Mật khẩu sẽ được nhập mới khi chỉnh sửa
+      password: "",
     });
   };
 
@@ -62,12 +63,12 @@ const UserManagement = () => {
   // Handle save edited user
   const handleSave = async () => {
     try {
-      console.log("Dữ liệu gửi lên API:", formData); // Log dữ liệu gửi lên
-      await axios.put(`http://localhost:5000/api/users/${editingUser.id}`, formData);
+      console.log("Dữ liệu gửi lên API:", formData);
+      await axios.put(`${API_BASE_URL}/api/users/${editingUser.id}`, formData);
       setUsers(
         users.map((user) =>
           user.id === editingUser.id
-            ? { ...user, ...formData, password: undefined } // Không lưu mật khẩu trong danh sách người dùng
+            ? { ...user, ...formData, password: undefined }
             : user
         )
       );
@@ -82,10 +83,10 @@ const UserManagement = () => {
   // Handle add new user
   const handleAdd = async () => {
     try {
-      console.log("Dữ liệu gửi lên API:", formData); // Log dữ liệu gửi lên
-      const res = await axios.post("http://localhost:5000/api/users", formData);
-      setUsers([...users, res.data]); // Thêm người dùng mới vào danh sách
-      setEditingUser(null); // Đóng form
+      console.log("Dữ liệu gửi lên API:", formData);
+      const res = await axios.post(`${API_BASE_URL}/api/users`, formData);
+      setUsers([...users, res.data]);
+      setEditingUser(null);
       alert("Thêm người dùng thành công!");
     } catch (err) {
       console.error("Lỗi khi thêm người dùng:", err);
@@ -112,7 +113,7 @@ const UserManagement = () => {
             <button
               onClick={() => {
                 setEditingUser({});
-                setFormData({ username: "", email: "", role: "volunteer", password: "" }); // Đặt giá trị mặc định cho role
+                setFormData({ username: "", email: "", role: "volunteer", password: "" });
               }}
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
             >
@@ -134,9 +135,8 @@ const UserManagement = () => {
                 {users.map((user, index) => (
                   <tr
                     key={user.id}
-                    className={`border-t ${
-                      index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                    } hover:bg-gray-100`}
+                    className={`border-t ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                      } hover:bg-gray-100`}
                   >
                     <td className="py-3 px-4">{index + 1}</td>
                     <td className="py-3 px-4">{user.username}</td>

@@ -29,7 +29,7 @@ export default function Login({ setUser }) {
       const data = await response.json();
       // Log dữ liệu trả về và trạng thái response
       console.log("Dữ liệu trả về từ API:", data);
-      alert("API response: " + JSON.stringify(data)); // Hiện popup trên iPhone
+  
 
       // Kiểm tra data.user và data.user.role tồn tại trước khi truy cập
       if (response.ok && data.user && data.user.role) {
@@ -59,7 +59,7 @@ export default function Login({ setUser }) {
       }
     } catch (err) {
       console.error("Lỗi khi đăng nhập:", err.message);
-      alert("Lỗi: " + err.message); // Hiện popup lỗi trên iPhone
+      alert("Lỗi: " + err.message); 
       setError("Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.");
     }
   };

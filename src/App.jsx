@@ -8,7 +8,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import VolunteerDashboard from './pages/VolunteerDashboard';
 import UserManagement from './pages/UserManagement';
 import OrganizerDashboard from "./pages/OrganizerDashboard";
-import AddEvent from "./backend/organizer/AddEvent";
+import AddEvent from "./pages/AddEvent";
 import EventDetails from "./pages/EventDetails";
 import EditEvent from "./pages/EditEvent";
 import VolunteerManagement from "./pages/VolunteerManagement";

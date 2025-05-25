@@ -5,27 +5,20 @@ import { useNavigate } from "react-router-dom";
 const Sidebar = ({ role, onLogout }) => {
   const navigate = useNavigate();
 
-  // Cấu hình sidebar dựa trên vai trò
   const menuItems = {
     admin: [
       { label: "Quản lý tài khoản", icon: <FiUsers />, path: "/admin/user-management" },
-      { label: "Quản lý hoạt động", icon: <FiClipboard />, path: "/admin/volunteer-activities" },
-      { label: "Xác nhận giờ đặc biệt", icon: <FiCheckCircle />, path: "/admin/confirm-special-hours" },
-      { label: "Thống kê & Báo cáo", icon: <FiBarChart2 />, path: "/admin/statistics" },
-      { label: "Gửi thông báo", icon: <FiBell />, path: "/admin/notifications" },
       { label: "Duyệt organizer", icon: <FiCheckCircle />, path: "/admin/organizer-requests" },
       { label: "Cài đặt hệ thống", icon: <FiSettings />, path: "/admin/settings" },
     ],
     volunteer: [
       { label: "Danh sách hoạt động", icon: <FiList />, path: "/volunteer/activities" },
-      { label: "Lịch sử tham gia", icon: <FiClock />, path: "/volunteer/history" },
       { label: "Trò chuyện với tổ chức", icon: <FiMessageCircle />, path: "/chat" },
       { label: "Đăng ký làm Organizer", icon: <FiCheckCircle />, path: "/volunteer/apply-organizer" },
     ],
     organizer: [
       { label: "Quản lý sự kiện", icon: <FiCalendar />, path: "/organizer/events" },
       { label: "Quản lý tình nguyện viên", icon: <FiUsers />, path: "/organizer/volunteers" },
-      { label: "Xác nhận giờ phục vụ", icon: <FiCheckCircle />, path: "/organizer/verify-hours" },
       { label: "Trò chuyện với tình nguyện viên", icon: <FiMessageCircle />, path: "/organizer/messages" },
     ],
   };

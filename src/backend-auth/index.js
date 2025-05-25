@@ -22,7 +22,7 @@ const frontendOrigin = API_BASE_URL.replace(/:5000$/, ":5173");
 const allowedOrigins = [
   "http://localhost:5173",
   frontendOrigin,
-  "http://192.168.1.5:5173"
+  "http://192.168.1.13:5173",
 ];
 
 // Socket.io: dùng hàm kiểm tra động cho origin để tránh lỗi CORS khi nhiều origin khác nhau
@@ -35,16 +35,18 @@ const io = new Server(server, {
         callback(new Error("Not allowed by CORS (socket.io)"));
       }
     },
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+  },
 });
 
 // CORS cho REST API
-app.use(cors({
-  origin: allowedOrigins,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.use("/api/messages", messagesRouter);
